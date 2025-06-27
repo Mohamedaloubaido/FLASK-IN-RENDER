@@ -1,0 +1,291 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sanimage.pngs-serif;
+    background: linear-gradient(120deg, #f8fafc 0%, #e0f7fa 100%);
+}
+
+body.dark-mode {
+    background: #181a1b !important;
+    color: #e0e0e0 !important;
+}
+body.dark-mode .card {
+    background: #23272b !important;
+    color: #e0e0e0 !important;
+    border-color: #333 !important;
+}
+body.dark-mode .table {
+    background: #23272b !important;
+    color: #e0e0e0 !important;
+}
+body.dark-mode .table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #202225 !important;
+}
+body.dark-mode .navbar, body.dark-mode .navbar-nav, body.dark-mode .navbar-brand {
+    background: #23272b !important;
+    color: #e0e0e0 !important;
+}
+body.dark-mode .btn, body.dark-mode .btn:focus {
+    border-color: #444 !important;
+}
+body.dark-mode .btn-primary {
+    background: #375a7f !important;
+    border-color: #375a7f !important;
+}
+body.dark-mode .btn-success {
+    background: #218838 !important;
+    border-color: #218838 !important;
+}
+body.dark-mode .btn-danger {
+    background: #c82333 !important;
+    border-color: #c82333 !important;
+}
+body.dark-mode .btn-outline-secondary, body.dark-mode .btn-outline-secondary:focus {
+    color: #e0e0e0 !important;
+    border-color: #888 !important;
+}
+body.dark-mode .form-control, body.dark-mode .form-select {
+    background: #23272b !important;
+    color: #e0e0e0 !important;
+    border-color: #444 !important;
+}
+body.dark-mode .modal-content {
+    background: #23272b !important;
+    color: #e0e0e0 !important;
+}
+body.dark-mode .azkar-bar {
+    background: #23272b !important;
+    color: #ffd700 !important;
+    border-bottom: 1px solid #444 !important;
+}
+body.dark-mode .balance-item {
+    background: #23272b !important;
+    color: #e0e0e0 !important;
+}
+body.dark-mode .badge {
+    background: #444 !important;
+    color: #ffd700 !important;
+}
+body.dark-mode .table thead th {
+    color: #ffd700 !important;
+}
+
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+.balance-item {
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.balance-positive {
+    background-color: #c6f6d5;
+    color: #065c2f;
+    border: 1px solid #0f5132;
+}
+
+.balance-negative {
+    background-color: #f8d7da;
+    color: #7a1020;
+    border: 1.5px solid #a71d2a;
+}
+
+.balance-zero {
+    background-color: #e2e3e5;
+    color: #383d41;
+    border: 1px solid #d6d8db;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    margin-bottom: 1rem;
+    transition: box-shadow 0.3s, transform 0.2s;
+}
+
+.card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transform: translateY(-4px) scale(1.01);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    display: flex;
+    justify-content: between;
+    align-items: center;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    border-top: none;
+    font-weight: 600;
+}
+
+.debt-settled {
+    background-color: #d4edda !important;
+}
+
+.debt-unsettled {
+    background-color: #f8d7da !important;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.nav-link {
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.modal-content {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    border-bottom: 1px solid #dee2e6;
+    background-color: #f8f9fa;
+}
+
+.form-control, .form-select {
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.table-responsive {
+    border-radius: 5px;
+}
+
+.alert {
+    border-radius: 5px;
+    border: none;
+}
+
+.currency-badge {
+    font-size: 0.9em;
+    padding: 4px 8px;
+    border-radius: 15px;
+}
+
+.company-balance {
+    font-size: 0.9em;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin: 2px 0;
+}
+
+@media (max-width: 768px) {
+    .card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .card-header > * {
+        margin-bottom: 0.5rem;
+    }
+    
+    .card-header > *:last-child {
+        margin-bottom: 0;
+    }
+    
+    .table-responsive {
+        font-size: 0.9em;
+    }
+}
+
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.transition {
+    transition: transform 0.2s;
+}
+
+.companies-collapsed .transition {
+    transform: rotate(-90deg);
+}
+
+.azkar-bar {
+    width: 100%;
+    background: #e0f7fa;
+    color: #00695c;
+    font-size: 1.2em;
+    padding: 8px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    border-bottom: 1px solid #b2ebf2;
+    direction: rtl;
+    text-align: right;
+    z-index: 1000;
+}
+.azkar-bar span {
+    display: inline-block;
+    padding-right: 100%;
+    animation: azkar-marquee 18s linear infinite;
+}
+@keyframes azkar-marquee {
+    0% { transform: translateX(100%);}
+    100% { transform: translateX(-100%);}
+}
+
+.loader {
+    border: 6px solid #e0f7fa;
+    border-top: 6px solid #00695c;
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    animation: spin 1s linear infinite;
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    z-index: 2000;
+    display: none;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+}
+
+.toast {
+    position: fixed; bottom: 30px; left: 30px;
+    background: #00695c; color: #fff; padding: 12px 24px;
+    border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    opacity: 0; transition: opacity 0.5s;
+    z-index: 3000;
+}
+.toast.show { opacity: 1; }
+
