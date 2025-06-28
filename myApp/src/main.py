@@ -51,30 +51,4 @@ def serve(path):
 
 
 if __name__ == '__main__':
-    try:
-        # محاولة تشغيل ngrok إذا كان متاحًا
-        from pyngrok import ngrok
-        print("🚀 بدء تشغيل الخادم مع ngrok...")
-        print("⏳ جاري إنشاء رابط عام...")
-        
-        # تشغيل ngrok
-        public_url = ngrok.connect(5000)
-        print(f"✅ تم إنشاء الرابط العام: {public_url}")
-        print(f"🌐 يمكن الوصول للنظام من أي جهاز عبر: {public_url}")
-        print("📱 شارك هذا الرابط مع الأجهزة الأخرى")
-        print("-" * 50)
-        
-    except ImportError:
-        print("⚠️  pyngrok غير مثبت. تشغيل الخادم المحلي فقط...")
-        print("💡 لتشغيل ngrok: pip install pyngrok")
-        public_url = None
-    except Exception as e:
-        print(f"⚠️  خطأ في تشغيل ngrok: {e}")
-        print("🔄 تشغيل الخادم المحلي فقط...")
-        public_url = None
-    
-    print("🖥️  الخادم يعمل على: http://localhost:5000")
-    if public_url:
-        print(f"🌍 الرابط العام: {public_url}")
-    
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=True)

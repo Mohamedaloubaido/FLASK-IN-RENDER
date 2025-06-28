@@ -1,0 +1,6 @@
+v: 0
+micros:
+  - name: exchange-system
+    src: .
+    engine: python3.9
+    primary: true 

@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الصرافة والذهب</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="fas fa-coins me-2"></i>نظام إدارة الصرافة والذهب</a>
+            <button class="btn btn-warning btn-sm ms-2" onclick="openPopupWindow()">
+                <i class="fas fa-window-restore"></i> نافذة عائمة
+            </button>
+            <button class="btn btn-dark btn-sm ms-2" id="toggle-dark-mode" title="تبديل الوضع الليلي">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="btn btn-secondary btn-sm ms-2" id="open-calculator" title="آلة حاسبة">
+                <i class="fas fa-calculator"></i>
+            </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" onclick="showSection('inventory', event)">
+                            <i class="fas fa-chart-bar me-1"></i>الجرد
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('gold', event)">
+                            <i class="fas fa-gem me-1"></i>الذهب
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('cashbox', event)">
+                            <i class="fas fa-safe me-1"></i>الصندوق
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('debts', event)">
+                            <i class="fas fa-file-invoice me-1"></i>الديون
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('remittances', event)">
+                            <i class="fas fa-paper-plane me-1"></i>الحوالات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('transfers', event)">
+                            <i class="fas fa-exchange-alt me-1"></i>التحويلات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('amanat', event)">
+                            <i class="fas fa-shield-alt me-1"></i>الأمانات
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showSection('shopgold', event)">
+                            <i class="fas fa-store me-1"></i>إدارة محل الذهب
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div id="azkar-bar" class="azkar-bar">
+        <span id="azkar-text"></span>
+    </div>
+
+    <div class="container-fluid mt-4">
+        <!-- Inventory Section -->
+        <div id="inventory-section" class="section active">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-chart-bar me-2"></i>الجرد العام</h5>
+                            <button class="btn btn-primary btn-sm" onclick="refreshInventory()">
+                                <i class="fas fa-sync-alt me-1"></i>تحديث
+                            </button>
+                            <button class="btn btn-danger btn-sm ms-2" onclick="resetAll()">
+                                <i class="fas fa-trash"></i> إعادة ضبط كل شيء (حذف جميع الحوالات والديون)
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm ms-2" onclick="window.open('/api/export/inventory/pdf', '_blank')">
+                                <i class="fas fa-file-pdf"></i> تصدير إلى PDF
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm ms-2" onclick="document.getElementById('import-inventory-excel').click()">
+                                <i class="fas fa-file-import"></i> استيراد من Excel
+                            </button>
+                            <input type="file" id="import-inventory-excel" accept=".xlsx" style="display:none" onchange="importInventoryExcel(this)">
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6>العملات</h6>
+                                    <div id="currencies-list"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6>الذهب</h6>
+                                    <div id="gold-balance" class="balance-item"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6>
+                                        <button class="btn btn-link p-0 d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#companies-collapse" aria-expanded="false" aria-controls="companies-collapse">
+                                            <span>أرصدة الشركات</span>
+                                            <i class="fas fa-chevron-down ms-2 transition" id="companies-arrow"></i>
+                                        </button>
+                                    </h6>
+                                    <button class="btn btn-success btn-sm mb-2" data-bs-toggle="modal" data-bs-target="#addCompanyModal">
+                                        <i class="fas fa-plus me-1"></i>إضافة شركة
+                                    </button>
+                                    <div class="collapse" id="companies-collapse">
+                                        <ul id="companies-list" class="sortable-list"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Statement Section -->
+        <div id="account-statement-section" class="section" style="display:none">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-file-invoice-dollar me-2"></i>كشف حساب العملة: <span id="account-statement-currency"></span></h5>
+                            <button class="btn btn-secondary" onclick="showSection('inventory')">رجوع للجرد</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <div class="alert alert-success">إجمالي الدخل: <span id="account-statement-total-in">0</span></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="alert alert-danger">إجمالي السحب: <span id="account-statement-total-out">0</span></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="alert alert-info">الرصيد النهائي: <span id="account-statement-balance">0</span></div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>التاريخ</th>
+                                            <th>العملية</th>
+                                            <th>المبلغ</th>
+                                            <th>القسم/المصدر</th>
+                                            <th>ملاحظات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="account-statement-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gold Section -->
+        <div id="gold-section" class="section">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-gem me-2"></i>إدارة الذهب</h5>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#goldModal">
+                                <i class="fas fa-plus me-1"></i>إضافة معاملة
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>التاريخ</th>
+                                            <th>النوع</th>
+                                            <th>نوع القطعة</th>
+                                            <th>الكمية</th>
+                                            <th>العملة</th>
+                                            <th>المبلغ</th>
+                                            <th>السعر للوحدة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="gold-transactions-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shop Gold Section -->
+        <div id="shopgold-section" class="section">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-store me-2"></i>إدارة محل الذهب</h5>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#shopGoldModal">
+                                <i class="fas fa-plus me-1"></i>إضافة ذهب
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>النوع</th>
+                                            <th>اسم النوع</th>
+                                            <th>عدد القطع</th>
+                                            <th>الوزن (غ)</th>
+                                            <th>العيار</th>
+                                            <th>سعر الغرام</th>
+                                            <th>التاريخ</th>
+                                            <th>ملاحظات</th>
+                                            <th>إجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="shopgold-table">
+                                        <tr>
+                                            <td id="shopgold-type"></td>
+                                            <td id="shopgold-piece-type"></td>
+                                            <td id="shopgold-quantity"></td>
+                                            <td id="shopgold-weight"></td>
+                                            <td id="shopgold-karat"></td>
+                                            <td id="shopgold-price"></td>
+                                            <td id="shopgold-date"></td>
+                                            <td id="shopgold-notes"></td>
+                                            <td id="shopgold-actions"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <label>سعر السوق (شراء):</label>
+                                    <input type="number" id="shopgold-buy-price" class="form-control" value="0" step="0.01">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>سعر السوق (مبيع):</label>
+                                    <input type="number" id="shopgold-sell-price" class="form-control" value="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="alert alert-info">
+                                        إجمالي الوزن: <span id="shopgold-total-weight">0</span> غرام
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="alert alert-success">
+                                        القيمة النقدية (شراء): <span id="shopgold-total-buy">0</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="alert alert-warning">
+                                        القيمة النقدية (مبيع): <span id="shopgold-total-sell">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cash Box Section -->
+        <div id="cashbox-section" class="section">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-safe me-2"></i>الصندوق (الخزنة)</h5>
+                            <div>
+                                <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#cashboxModal">
+                                    <i class="fas fa-plus me-1"></i>إضافة مبلغ
+                                </button>
+                                <button class="btn btn-warning" onclick="clearCashbox()">
+                                    <i class="fas fa-trash me-1"></i>تفريغ الصندوق
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <h6>ملخص الصندوق</h6>
+                                    <div id="cashbox-summary"></div>
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>التاريخ</th>
+                                            <th>العملة</th>
+                                            <th>المبلغ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cashbox-entries-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debts Section -->
+        <div id="debts-section" class="section">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-file-invoice me-2"></i>دفتر الديون</h5>
+                            <div>
+                                <button class="btn btn-outline-dark me-2" onclick="exportDebtsPDF()">
+                                    <i class="fas fa-file-pdf me-1"></i>تصدير PDF
+                                </button>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#debtModal">
+                                <i class="fas fa-plus me-1"></i>إضافة دين
+                            </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="debts-summary"></div>
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <input type="text" id="debt-search" class="form-control" placeholder="بحث سريع...">
+                                </div>
+                                <div class="col-md-2">
+                                    <select id="debt-currency-filter" class="form-select">
+                                        <option value="">كل العملات</option>
+                                        <option value="USD">دولار</option>
+                                        <option value="TRY">ليرة تركية</option>
+                                        <option value="EUR">يورو</option>
+                                        <option value="SYP">ليرة سورية</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select id="debt-type-filter" class="form-select">
+                                        <option value="">كل الأنواع</option>
+                                        <option value="borrowed_from_someone">اتدينت من شخص</option>
+                                        <option value="lent_to_someone">شخص تدين مني</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" id="debt-date-from" class="form-control" placeholder="من تاريخ">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" id="debt-date-to" class="form-control" placeholder="إلى تاريخ">
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>التاريخ</th>
+                                            <th>اسم الشخص</th>
+                                            <th>النوع</th>
+                                            <th>المبلغ</th>
+                                            <th>العملة</th>
+                                            <th>ملاحظات</th>
+                                            <th>الحالة</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="debts-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remittances Section -->
+        <div id="remittances-section" class="section">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-paper-plane me-2"></i>الحوالات</h5>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#remittanceModal">
+                                <i class="fas fa-plus me-1"></i>إضافة حوالة
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm ms-2" onclick="window.open('/api/export/remittances/pdf', '_blank')">
+                                <i class="fas fa-file-pdf"></i> تصدير إلى PDF
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <input type="text" id="remittance-search" class="form-control" placeholder="بحث سريع...">
+                                </div>
+                                <div class="col-md-2">
+                                    <select id="remittance-currency-filter" class="form-select">
+                                        <option value="">كل العملات</option>
+                                        <option value="USD">دولار</option>
+                                        <option value="TRY">ليرة تركية</option>
+                                        <option value="EUR">يورو</option>
+                                        <option value="SYP">ليرة سورية</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select id="remittance-type-filter" class="form-select">
+                                        <option value="">كل الأنواع</option>
+                                        <option value="send">إرسال</option>
+                                        <option value="receive">استلام</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" id="remittance-date-from" class="form-control" placeholder="من تاريخ">
+                                </div>
+                                <div class="col-md-2">
+                                    <input type="date" id="remittance-date-to" class="form-control" placeholder="إلى تاريخ">
+                                </div>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>التاريخ</th>
+                                            <th>النوع</th>
+                                            <th>رقم الإشعار</th>
+                                            <th>اسم الشخص</th>
+                                            <th>المبلغ</th>
+                                            <th>العملة</th>
+                                            <th>الشركة</th>
+                                            <th>ملاحظات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="remittances-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transfers Section -->
+        <div id="transfers-section" class="section">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-building me-2"></i>تحويل بين الشركات</h5>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#companyTransferModal">
+                                <i class="fas fa-plus me-1"></i>إضافة تحويل
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>التاريخ</th>
+                                            <th>من</th>
+                                            <th>إلى</th>
+                                            <th>المبلغ</th>
+                                            <th>العملة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="company-transfers-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-exchange-alt me-2"></i>تحويل بين العملات</h5>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#currencyConversionModal">
+                                <i class="fas fa-plus me-1"></i>إضافة تحويل
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>التاريخ</th>
+                                            <th>من</th>
+                                            <th>إلى</th>
+                                            <th>المبلغ الأصلي</th>
+                                            <th>المبلغ المحول</th>
+                                            <th>السعر</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="currency-conversions-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Amanat Section -->
+        <div id="amanat-section" class="section">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5><i class="fas fa-shield-alt me-2"></i>الأمانات</h5>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addAmanahModal">
+                                <i class="fas fa-plus me-1"></i>إضافة أمانة
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>النوع</th>
+                                            <th>الاسم/الجهة</th>
+                                            <th>العملة</th>
+                                            <th>الكمية/المبلغ</th>
+                                            <th>التاريخ</th>
+                                            <th>ملاحظات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="amanat-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Gold Modal -->
+    <div class="modal fade" id="goldModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة معاملة ذهب</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="goldForm">
+                        <div class="mb-3">
+                            <label class="form-label">النوع</label>
+                            <select class="form-select" name="type" required>
+                                <option value="buy">شراء</option>
+                                <option value="sell">بيع</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">نوع القطعة</label>
+                            <select class="form-select" name="item_type" required>
+                                <option value="gram">غرام</option>
+                                <option value="piece">قطعة</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الكمية</label>
+                            <input type="number" class="form-control" name="quantity" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">العملة</label>
+                            <select class="form-select" name="currency" required>
+                                <option value="USD">دولار أمريكي</option>
+                                <option value="TRY">ليرة تركية</option>
+                                <option value="EUR">يورو</option>
+                                <option value="SYP">ليرة سورية</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">السعر للوحدة</label>
+                            <input type="number" class="form-control" name="price_per_unit" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المبلغ الإجمالي</label>
+                            <input type="number" class="form-control" name="amount" step="0.01" required readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="submitGoldTransaction()">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cash Box Modal -->
+    <div class="modal fade" id="cashboxModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة مبلغ للصندوق</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="cashboxForm">
+                        <div class="mb-3">
+                            <label class="form-label">العملة</label>
+                            <select class="form-select" name="currency" required>
+                                <option value="USD">دولار أمريكي</option>
+                                <option value="TRY">ليرة تركية</option>
+                                <option value="EUR">يورو</option>
+                                <option value="SYP">ليرة سورية</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المبلغ</label>
+                            <input type="number" class="form-control" name="amount" step="0.01" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="submitCashboxEntry()">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debt Modal -->
+    <div class="modal fade" id="debtModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة/تعديل دين</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="debtForm">
+                        <input type="hidden" name="debt_id" id="debt_id">
+                        <div class="mb-3">
+                            <label class="form-label">اسم الشخص</label>
+                            <input type="text" class="form-control" name="person_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">نوع الدين</label>
+                            <select class="form-select" name="type" required>
+                                <option value="borrowed_from_someone">اتدينت من شخص</option>
+                                <option value="lent_to_someone">شخص تدين مني</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المبلغ</label>
+                            <input type="number" class="form-control" name="amount" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">العملة</label>
+                            <select class="form-select" name="currency" required>
+                                <option value="USD">دولار أمريكي</option>
+                                <option value="TRY">ليرة تركية</option>
+                                <option value="EUR">يورو</option>
+                                <option value="SYP">ليرة سورية</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">التاريخ</label>
+                            <input type="date" class="form-control" name="date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ملاحظات</label>
+                            <input type="text" class="form-control" name="notes">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="submitDebt()">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remittance Modal -->
+    <div class="modal fade" id="remittanceModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة حوالة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="remittanceForm">
+                        <div class="mb-3">
+                            <label class="form-label">نوع الحوالة</label>
+                            <select class="form-select" name="type" required>
+                                <option value="send">إرسال حوالة</option>
+                                <option value="receive">استلام حوالة</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">رقم الإشعار</label>
+                            <input type="text" class="form-control" name="receipt_number" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">تاريخ الحوالة</label>
+                            <input type="date" class="form-control" name="date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">اسم الشخص</label>
+                            <input type="text" class="form-control" name="person_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المبلغ</label>
+                            <input type="number" class="form-control" name="amount" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">العملة</label>
+                            <select class="form-select" name="currency" required>
+                                <option value="USD">دولار أمريكي</option>
+                                <option value="TRY">ليرة تركية</option>
+                                <option value="EUR">يورو</option>
+                                <option value="SYP">ليرة سورية</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الشركة</label>
+                            <select class="form-select" name="company_id" id="remittance-company-select" required>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ملاحظات</label>
+                            <textarea class="form-control" name="notes" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">صورة الهوية (اختياري، حتى صورتين)</label>
+                            <input type="file" class="form-control mb-1" name="id_image1" accept="image/*">
+                            <input type="file" class="form-control" name="id_image2" accept="image/*">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="submitRemittance()">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Company Transfer Modal -->
+    <div class="modal fade" id="companyTransferModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تحويل بين الشركات</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="companyTransferForm">
+                        <div class="mb-3">
+                            <label class="form-label">من الشركة</label>
+                            <select class="form-select" name="from_company_id" id="from-company-select" required>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">إلى الشركة</label>
+                            <select class="form-select" name="to_company_id" id="to-company-select" required>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المبلغ</label>
+                            <input type="number" class="form-control" name="amount" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">العملة</label>
+                            <select class="form-select" name="currency" required>
+                                <option value="USD">دولار أمريكي</option>
+                                <option value="TRY">ليرة تركية</option>
+                                <option value="EUR">يورو</option>
+                                <option value="SYP">ليرة سورية</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="submitCompanyTransfer()">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Currency Conversion Modal -->
+    <div class="modal fade" id="currencyConversionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تحويل بين العملات</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="currencyConversionForm">
+                        <div class="mb-3">
+                            <label class="form-label">من العملة</label>
+                            <select class="form-select" name="from_currency" required>
+                                <option value="USD">دولار أمريكي</option>
+                                <option value="TRY">ليرة تركية</option>
+                                <option value="EUR">يورو</option>
+                                <option value="SYP">ليرة سورية</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">إلى العملة</label>
+                            <select class="form-select" name="to_currency" required>
+                                <option value="USD">دولار أمريكي</option>
+                                <option value="TRY">ليرة تركية</option>
+                                <option value="EUR">يورو</option>
+                                <option value="SYP">ليرة سورية</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المبلغ الأصلي</label>
+                            <input type="number" class="form-control" name="from_amount" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">سعر الصرف</label>
+                            <input type="number" class="form-control" name="exchange_rate" step="0.0001" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المبلغ المحول</label>
+                            <input type="number" class="form-control" name="to_amount" step="0.01" required readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الشركة</label>
+                            <select class="form-select" name="company_id" id="currency-company-select">
+                                <option value="">بدون شركة</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">رصيد الشركة بالعملة المختارة</label>
+                            <input type="text" class="form-control" id="company-currency-balance" readonly>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="submitCurrencyConversion()">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal لإضافة شركة جديدة -->
+    <div class="modal fade" id="addCompanyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة شركة جديدة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCompanyForm">
+                        <div class="mb-3">
+                            <label class="form-label">اسم الشركة</label>
+                            <input type="text" class="form-control" name="company_name" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="submitAddCompany()">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal لعمليات الشركة (سحب/إيداع) -->
+    <div class="modal fade" id="company-operation-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">عملية على الشركة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">الشركة</label>
+                        <div id="company-operation-company" class="form-control" readonly></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">نوع العملية</label>
+                        <div id="company-operation-type" class="form-control" readonly></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">المبلغ</label>
+                        <input type="number" class="form-control" id="company-operation-amount" min="0.01" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">العملة</label>
+                        <select class="form-select" id="company-operation-currency" required>
+                            <option value="">اختر العملة</option>
+                            <option value="USD">دولار أمريكي</option>
+                            <option value="TRY">ليرة تركية</option>
+                            <option value="EUR">يورو</option>
+                            <option value="SYP">ليرة سورية</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="submitCompanyOperation()">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Amanah Modal -->
+    <div class="modal fade" id="addAmanahModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة أمانة جديدة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAmanahForm">
+                        <div class="mb-3">
+                            <label class="form-label">نوع الأمانة</label>
+                            <select class="form-select" name="type" id="amanah-type" required>
+                                <option value="money">أموال</option>
+                                <option value="gold">ذهب</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الاسم/الجهة</label>
+                            <input type="text" class="form-control" name="person_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">العملة</label>
+                            <input type="text" class="form-control" name="currency" id="amanah-currency">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الكمية/المبلغ</label>
+                            <input type="number" class="form-control" name="amount" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">التاريخ</label>
+                            <input type="date" class="form-control" name="date" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ملاحظات</label>
+                            <input type="text" class="form-control" name="notes">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="submitAmanah()">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculator Modal -->
+    <div class="modal fade" id="calculatorModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">آلة حاسبة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="calculator">
+                        <input type="text" class="form-control mb-2 text-end" id="calc-display" readonly style="font-size:1.5em;">
+                        <div class="row g-1">
+                            <div class="col-3"><button class="btn btn-light w-100" onclick="calcInput('7')">7</button></div>
+                            <div class="col-3"><button class="btn btn-light w-100" onclick="calcInput('8')">8</button></div>
+                            <div class="col-3"><button class="btn btn-light w-100" onclick="calcInput('9')">9</button></div>
+                            <div class="col-3"><button class="btn btn-warning w-100" onclick="calcInput('/')">÷</button></div>
+                            <div class="col-3"><button class="btn btn-light w-100" onclick="calcInput('4')">4</button></div>
+                            <div class="col-3"><button class="btn btn-light w-100" onclick="calcInput('5')">5</button></div>
+                            <div class="col-3"><button class="btn btn-light w-100" onclick="calcInput('6')">6</button></div>
+                            <div class="col-3"><button class="btn btn-warning w-100" onclick="calcInput('*')">×</button></div>
+                            <div class="col-3"><button class="btn btn-light w-100" onclick="calcInput('1')">1</button></div>
+                            <div class="col-3"><button class="btn btn-light w-100" onclick="calcInput('2')">2</button></div>
+                            <div class="col-3"><button class="btn btn-light w-100" onclick="calcInput('3')">3</button></div>
+                            <div class="col-3"><button class="btn btn-warning w-100" onclick="calcInput('-')">-</button></div>
+                            <div class="col-3"><button class="btn btn-light w-100" onclick="calcInput('0')">0</button></div>
+                            <div class="col-3"><button class="btn btn-light w-100" onclick="calcInput('.')">.</button></div>
+                            <div class="col-3"><button class="btn btn-danger w-100" onclick="calcClear()">C</button></div>
+                            <div class="col-3"><button class="btn btn-warning w-100" onclick="calcInput('+')">+</button></div>
+                            <div class="col-6 mt-1"><button class="btn btn-success w-100" onclick="calcEvaluate()">=</button></div>
+                            <div class="col-6 mt-1"><button class="btn btn-outline-primary w-100" onclick="calcCopy()"><i class="fas fa-copy"></i> نسخ</button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remittance Details Modal -->
+    <div class="modal fade" id="remittanceDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تفاصيل الحوالة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="remittance-details-body">
+                    <!-- سيتم تعبئتها ديناميكياً -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal مطابقة حساب الشركة -->
+    <div class="modal fade" id="companyMatchModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">مطابقة حساب الشركة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">يمكنك نسخ الرسالة وإرسالها للواتس مباشرة:</div>
+                    <textarea id="company-match-message" class="form-control mb-2" rows="6" readonly style="font-family:monospace"></textarea>
+                    <button class="btn btn-primary w-100" onclick="copyCompanyMatchMessage()"><i class="fas fa-copy me-1"></i>نسخ الرسالة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Gold Modal -->
+    <div class="modal fade" id="shopGoldModal" tabindex="-1" aria-labelledby="shopGoldModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="shopGoldModalLabel">إضافة ذهب جديد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="shopgold-form">
+                        <div class="mb-3">
+                            <label for="shopgold-type" class="form-label">نوع الذهب</label>
+                            <select class="form-select" id="shopgold-type" required>
+                                <option value="جديد">جديد</option>
+                                <option value="مستعمل">مستعمل</option>
+                                <option value="خشر">خشر</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="shopgold-weight" class="form-label">الوزن (غ)</label>
+                            <input type="number" class="form-control" id="shopgold-weight" required step="0.01">
+                        </div>
+                        <div class="mb-3">
+                            <label for="shopgold-karat" class="form-label">العيار</label>
+                            <input type="number" class="form-control" id="shopgold-karat" required step="0.01">
+                        </div>
+                        <div class="mb-3">
+                            <label for="shopgold-price" class="form-label">سعر الغرام</label>
+                            <input type="number" class="form-control" id="shopgold-price" required step="0.01">
+                        </div>
+                        <div class="mb-3">
+                            <label for="shopgold-piece-type" class="form-label">اسم نوع القطعة</label>
+                            <input type="text" class="form-control" id="shopgold-piece-type" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="shopgold-quantity" class="form-label">عدد القطع</label>
+                            <input type="number" class="form-control" id="shopgold-quantity" required min="1" value="1">
+                        </div>
+                        <div class="mb-3">
+                            <label for="shopgold-notes" class="form-label">ملاحظات</label>
+                            <input type="text" class="form-control" id="shopgold-notes">
+                        </div>
+                        <button type="submit" class="btn btn-primary">إضافة</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debt History Modal -->
+    <div class="modal fade" id="debtHistoryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">سجل عمليات الدين</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>العملية</th>
+                                <th>المبلغ</th>
+                                <th>العملة</th>
+                                <th>ملاحظات</th>
+                                <th>تاريخ التسجيل</th>
+                            </tr>
+                        </thead>
+                        <tbody id="debt-history-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+    <div id="loader" class="loader"></div>
+    <div id="toast" class="toast"></div>
+</body>
+</html>
+
