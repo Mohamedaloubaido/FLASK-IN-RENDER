@@ -54,6 +54,10 @@ if __name__ == '__main__':
     try:
         # محاولة تشغيل ngrok إذا كان متاحًا
         from pyngrok import ngrok
+        
+        # إعداد authtoken
+        ngrok.set_auth_token('EIXBFWKFNHBKRCU5RLNPSH7KRDPVUHAO')
+        
         print("🚀 بدء تشغيل الخادم مع ngrok...")
         print("⏳ جاري إنشاء رابط عام...")
         
@@ -74,6 +78,7 @@ if __name__ == '__main__':
         public_url = None
     
     print("🖥️  الخادم يعمل على: http://localhost:5000")
+    print("🌐 الشبكة المحلية: http://192.168.31.185:5000")
     if public_url:
         print(f"🌍 الرابط العام: {public_url}")
     
